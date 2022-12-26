@@ -21,7 +21,8 @@ ICONST      "0"|[0-9]{digit}*
 FCONST      "0"|{digit}*"."{digit}+
 CCONST      (\'{print}\')|(\'\\[nftrbv]\')
 STRING      \"{print}*\"
-
+PREPROCESSOR_HEADER "#include \""{alnum}*".h\""
+PREPROCESSOR_BUILT_IN_LIBRARY "#include <"{alpha}*">"
 %%
  
 "//".*                  { printf("Eat up comment at line %d\n", lineno); } 
@@ -69,7 +70,7 @@ STRING      \"{print}*\"
 ","             { ret_print("COMMA"); }
 "="             { ret_print("ASSIGN"); }
 "&"             { ret_print("REFER"); }
-"#"				{ ret_print("PREPROCESSOR");}
+"#" { ret_print("PREPROCESSOR"); }
  
  
 {ID}            { ret_print("ID"); }
@@ -77,8 +78,8 @@ STRING      \"{print}*\"
 {FCONST}        { ret_print("FCONST"); }
 {CCONST}        { ret_print("CCONST"); }
 {STRING}        { ret_print("STRING"); }
- 
- 
+{PREPROCESSOR_BUILT_IN_LIBRARY} { ret_print("PREPROCESSOR"); }
+{PREPROCESSOR_HEADER} { ret_print("PREPROCESSOR"); }
 "\n"            { lineno += 1; }
 [ \t\r\f]+          /* eat up whitespace */
  

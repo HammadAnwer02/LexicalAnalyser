@@ -11,7 +11,7 @@
 
 %x ML_COMMENT
 
-alpha       [a-zA-Z]1
+alpha       [a-zA-Z]
 digit       [0-9]
 alnum       {alpha}|{digit}
 print       [ -~]
@@ -21,7 +21,12 @@ ICONST      "0"|[0-9]{digit}*
 FCONST      "0"|{digit}*"."{digit}+
 CCONST      (\'{print}\')|(\'\\[nftrbv]\')
 STRING      \"{print}*\"
-
+PREPROCESSOR_HEADER "#include \""{alnum}*".h\""
+PREPROCESSOR_BUILT_IN_LIBRARY "#include <"{alpha}*">"
+POSTINCREMENT {alpha}{alnum}*"++";
+PREINCREMENT "++"{alpha}{alnum}*;
+POSTDECREMENT {alpha}{alnum}*"--";
+PREDECREMENT "--"{alpha}{alnum}*;
 %%
  
 "//".*                  { printf("Eat up comment at line %d\n", lineno); } 
@@ -45,28 +50,11 @@ STRING      \"{print}*\"
 "break"|"BREAK"         { ret_print("KEYWORD_BREAK"); }
 "void"|"VOID"           { ret_print("KEYWORD_VOID"); }
 "return"|"RETURN"       { ret_print("KEYWORD_RETURN"); }
-"struct"|"STRUCT"       { ret_print("KEYWORD_STRUCT");}
-"enum"|"ENUM"           { ret_print("KEYWORD_ENUM");}
-"public"|"PUBLIC"       {ret_print("KEYWORD_PUBLIC");}
-"switch"|"SWITCH"       {ret_print("KEYWORD_SWITCH");}
-"new"|"NEW"             {ret_print("KEYWORD_NEW");}
-"delete"|"DELETE"       {ret_print("KEYWORD_DELETE")}
-"template|TEMPLATE"     {ret_print("KEYWORD_TEMPLATE")}
-"throw"|"THROW"         {ret_print("KEYWORD_THROW")}
-"catch"|"CATCH"         {ret_print("KEYWORD_CATCH")}
-"static"|"STATIC"       {ret_print("KEYWORD_STATIC")}
-"virtual"|"VIRTUAL"     {ret_print("KEYWORD_VIRTUAL")}
-"do"|"DO"               {ret_print("KEYWORD_DO")}
-"long|LONG"             {ret_print("KEYWORD_LONG")}
-"short|SHORT"           {ret_print("KEYWORD_SHORT")}
-"sizeof|SIZEof"         {ret_print("KEYWORD_SIZEOF")}
-
-
+ "using namespace std;" { ret_print("KEYWORD_USING_NAMESPACE"); }
  
 "+"|"-"                 { ret_print("ADDOP"); }
 "*"                     { ret_print("MULOP"); }
 "/"                     { ret_print("DIVOP"); }
-"++"|"--"               { ret_print("INCR"); }
 "||"                    { ret_print("OROP"); }
 "&&"                    { ret_print("ANDOP"); }
 "!"                     { ret_print("NOTOP"); }
@@ -85,7 +73,7 @@ STRING      \"{print}*\"
 ","             { ret_print("COMMA"); }
 "="             { ret_print("ASSIGN"); }
 "&"             { ret_print("REFER"); }
-"#"				{ ret_print("PREPROCESSOR");}
+"#" { ret_print("PREPROCESSOR"); }
  
  
 {ID}            { ret_print("ID"); }
@@ -93,8 +81,14 @@ STRING      \"{print}*\"
 {FCONST}        { ret_print("FCONST"); }
 {CCONST}        { ret_print("CCONST"); }
 {STRING}        { ret_print("STRING"); }
- 
- 
+{PREPROCESSOR_BUILT_IN_LIBRARY} { ret_print("PREPROCESSOR"); }
+{PREPROCESSOR_HEADER} { ret_print("PREPROCESSOR"); }
+{POSTINCREMENT} { ret_print("POSTINCREMENT"); }
+{PREINCREMENT} { ret_print("PREINCREMENT"); }
+{POSTDECREMENT} { ret_print("POSTDECREMENT"); }
+{PREDECREMENT} { ret_print("PREDECREMENT"); }
+
+
 "\n"            { lineno += 1; }
 [ \t\r\f]+          /* eat up whitespace */
  
